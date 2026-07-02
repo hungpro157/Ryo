@@ -1,0 +1,52 @@
+{
+  "1496876305214345347": [
+    {
+      "role": "user",
+      "userId": "1138469880585273344",
+      "username": "hoshino_al",
+      "content": "troll ?",
+      "ts": 1782981834920,
+      "dt": "15:43:54 2/7/2026"
+    },
+    {
+      "role": "assistant",
+      "userId": "ryo",
+      "username": "Ryo",
+      "content": "uh. brain.exe crashed. một giây",
+      "ts": 1782981835361,
+      "dt": "15:43:55 2/7/2026"
+    },
+    {
+      "role": "user",
+      "userId": "1138469880585273344",
+      "username": "hoshino_al",
+      "content": "<@1491820811558846655>",
+      "ts": 1782982816350,
+      "dt": "16:00:16 2/7/2026"
+    },
+    {
+      "role": "assistant",
+      "userId": "ryo",
+      "username": "Ryo",
+      "content": "thật ra là mention t đó à, gì thế?",
+      "ts": 1782982822828,
+      "dt": "16:00:22 2/7/2026"
+    },
+    {
+      "role": "user",
+      "userId": "1138469880585273344",
+      "username": "hoshino_al",
+      "content": "tag thôi có gì đâu",
+      "ts": 1782982841383,
+      "dt": "16:00:41 2/7/2026"
+    },
+    {
+      "role": "assistant",
+      "userId": "ryo",
+      "username": "Ryo",
+      "content": "thôi mà, em đang rảnh, không có việc gì cả, chỉ đang chờ đợi câu hỏi hay của anh thôi 😐",
+      "ts": 1782982847389,
+      "dt": "16:00:47 2/7/2026"
+    }
+  ]
+}

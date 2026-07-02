@@ -1,0 +1,16 @@
+{
+  "name": "ryo-discord-bot",
+  "version": "2.0.0",
+  "description": "Ryo — Discord AI Bot with memory & learning",
+  "main": "bot.js",
+  "type": "module",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "openai": "^4.52.7",
+    "dotenv": "^16.4.5"
+  }
+}
