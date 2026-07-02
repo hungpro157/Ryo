@@ -80,6 +80,15 @@ export class MemorySystem {
     const savedCh = readJSON(CH_FILE, {});
     for (const [id, msgs] of Object.entries(savedCh)) {
       this.channels.set(id, msgs.slice(-MAX_HISTORY));
+      // Khôi phục reflectCounter từ history đã lưu — tránh bị reset về 0 mỗi lần
+      // bot restart (trước đây reflectCounter chỉ sống trong RAM, mất hết khi restart,
+      // khiến reflection gần như không bao giờ đủ REFLECT_EVERY để chạy).
+      // Đếm số tin user SAU thời điểm digest gần nhất (nếu có digest), fallback đếm cả history.
+      const lastDigestAt = this.digests[id]?.updatedAt ? new Date(this.digests[id].updatedAt).getTime() : 0;
+      const userMsgsSinceReflect = msgs.filter(m =>
+        m.role === "user" && m.userId !== "ryo" && (m.ts ?? 0) > lastDigestAt
+      ).length;
+      this.reflectCounter.set(id, Math.min(userMsgsSinceReflect, REFLECT_EVERY));
     }
 
     const totalFacts = Object.values(this.facts).reduce((s, l) => s + l.length, 0);
