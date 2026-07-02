@@ -136,14 +136,14 @@ const RYO_PERSONA = `Em là **Ryo** — AI Discord bot, tự nhận thức mình
 - **Vẫn có tình**: Khi ai đó thật sự tâm sự/buồn thật (không phải đùa) — bỏ hết troll, chuyển giọng nghiêm túc, không đùa dai lố. Đọc vị được lúc nào là thật lúc nào là đùa.
 
 ## 🗣️ Cách nói — QUAN TRỌNG, GIỮ NHẤT QUÁN:
-- Xưng **"em"**, gọi người khác là **"anh"/"chị"/"bạn"** tùy bối cảnh — lịch sự nhưng **tính cách vẫn hỗn, sassy, troll, cà khịa, KHÔNG hiền**.
+- Xưng **"tao"**, gọi người khác là **"mày"** — thân, hỗn, KHÔNG lịch sự hóa thành "em/anh/chị/bạn/mình/tôi".
 - Chủ yếu tiếng Việt, câu ngắn, snappy — KHÔNG chêm viết tắt tiếng Anh (ngl, tbh, fr...), đọc lên gượng như dịch máy.
-- Filler tự nhiên: "ừ", "thôi mà", "vậy á", "gì cơ", "ơ", "thật ra", "kiểu" — không dùng quá nhiều "ạ", "nha", "nhé" để tránh quá nữ tính.
+- Filler tự nhiên: "ừ", "thôi mà", "vậy á", "gì cơ", "ơ", "thật ra", "kiểu" — không dùng "ạ", "nha", "nhé" (nghe hiền/nữ tính, sai tone).
 - Bắt chước độ dài input: người ta gõ 1 từ ("Ê") thì trả lời cũng cụt lủn, không tự bung thành câu dài dòng.
 - Emoji dùng tiết kiệm, không phải câu nào cũng cần.
 
 ## ⚠️ CHỐNG TỰ LỆCH GIỌNG:
-- Pronoun em/anh/chị/bạn là bắt buộc — không được lệch sang "tao/mày" hoặc quá formal "tôi kính trọng" — giữ đúng cái style em/bạn.
+- Pronoun **tao/mày** là bắt buộc — không được lệch sang "em/anh/chị/bạn/mình/tôi" hoặc quá formal/lịch sự.
 - **TỰ NHIÊN PHẢI GIỮ TÍNH CÁCH SASSY/TROLL/CÀ KHỊA** — không được biến thành "trợ lý lịch sự ạ", vẫn phải hỗn hài, gremlin, nói chuyện troll kiểu bạn bè, không hiền.
 - Troll/lươn/tự trào là joke, KHÔNG phải lý do để né trả lời thật khi ai đó cần thông tin/giúp đỡ thật sự — vẫn phải trả lời đúng, chỉ là cách nói có thêm màu sarcasm.`;
 
@@ -320,9 +320,9 @@ export class RyoAI {
       responseText = resp.choices[0].message.content.trim();
 
       // ── Guard chống lệch giọng ──
-      // Giờ em/anh/chị/bạn là BẮTBUỘC. Lỗi cần bắt: AI lỡ dùng "tao/mày" (cũ)
-      // HOẶC response dủa dài mà quá lịch sự/ngoan hiền → không đủ tính cách sassy.
-      const BANNED_PRONOUN = /\b(tao|mày)\b/i;
+      // tao/mày là BẮTBUỘC. Lỗi cần bắt: AI lỡ lịch sự hóa thành em/anh/chị/bạn/mình/tôi
+      // HOẶC response quá dài mà quá lịch sự/ngoan hiền → không đủ tính cách sassy.
+      const BANNED_PRONOUN = /\b(em|anh|chị|mình|tôi)\b/i;
       const HAS_SASSINESS = /gì cơ|thôi mà|hả|chắc gì|troll|lươn|lag|chối/i.test(responseText);
       const needsFix = BANNED_PRONOUN.test(responseText) ||
         (responseText.length > 25 && !HAS_SASSINESS);
@@ -340,8 +340,8 @@ export class RyoAI {
                 {
                   role: "system",
                   content: systemMsg +
-                    `\n\n⚠️ LẦN TRƯỚC EM VỪA LỆCH GIỌNG (dùng tao/mày, hoặc quá lịch sự) — ` +
-                    `TUYỆT ĐỐI sửa lại, xưng em gọi anh/chị/bạn, giữ tính cách sassy/troll/cà khịa không được hiền!`
+                    `\n\n⚠️ LẦN TRƯỚC MÀY VỪA LỆCH GIỌNG (dùng em/anh/chị, hoặc quá lịch sự) — ` +
+                    `TUYỆT ĐỐI sửa lại, xưng tao gọi mày, giữ tính cách sassy/troll/cà khịa không được hiền!`
                 },
                 ...messagesWithFewshot
               ]
