@@ -6,6 +6,7 @@ import { handleTranslate } from "./translate.js";
 import { handleImagine } from "./imagine.js";
 import { handlePoll } from "./poll.js";
 import { handle8ball } from "./eightball.js";
+import { handleVoice, handleSpeak } from "./voice.js";
 
 /**
  * Route commands tới handler tương ứng
@@ -28,6 +29,8 @@ export async function handleCommand(msg, args, context) {
     case "ve":        return handleImagine(msg, body, context);
     case "poll":      return handlePoll(msg, body, context);
     case "8ball":     return handle8ball(msg, body, context);
+    case "voice":     return handleVoice(msg, body, context);
+    case "speak":     return handleSpeak(msg, body, context);
     default:          return; // không phải lệnh biết tới, bỏ qua
   }
 }
