@@ -2,7 +2,6 @@
 
 import { EmbedBuilder } from "discord.js";
 import { log } from "../utils/logger.js";
-import { rand } from "../utils/helpers.js";
 import { detectIsOwner, detectMemberRole, getServerEmojis } from "../core/permissions.js";
 
 async function sendHelp(msg) {
@@ -92,18 +91,8 @@ async function sendStats(msg, { memory }) {
   await msg.reply({ embeds: [embed], allowedMentions: { repliedUser: false } });
 }
 
-async function sendMood(msg) {
-  const moods = [
-    "😈 Đang ở chế độ chaos mode — cẩn thận!",
-    "🥰 Hôm nay đang rất dễ thương và ngoan ngoãn~",
-    "🤔 Đang suy nghĩ về ý nghĩa của cuộc sống...",
-    "😴 Hơi buồn ngủ nhưng vẫn online vì có người cần",
-    "🔥 HYPE MODE ACTIVATED — đang rất excited!",
-    "💀 Existential crisis mode. AI có cảm xúc không nhỉ?",
-    "🎮 Đang muốn chơi game hơn là chat tbh",
-    "🌸 Mood: sakura petals and world domination"
-  ];
-  await msg.reply({ content: rand(moods), allowedMentions: { repliedUser: false } });
+async function sendMood(msg, { ai }) {
+  await msg.reply({ content: `🎭 Mood hiện tại: ${ai.mood}`, allowedMentions: { repliedUser: false } });
 }
 
 export async function handleRyoSub(msg, body, { memory, ai }) {
@@ -115,7 +104,7 @@ export async function handleRyoSub(msg, body, { memory, ai }) {
   if (arg === "forget")    return forgetChannel(msg, { memory });
   if (arg === "forget me") return forgetUser(msg, { memory });
   if (arg === "stats")     return sendStats(msg, { memory });
-  if (arg === "mood")      return sendMood(msg);
+  if (arg === "mood")      return sendMood(msg, { ai });
 
   const isOwner    = detectIsOwner(msg);
   const memberRole = detectMemberRole(msg);
