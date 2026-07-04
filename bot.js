@@ -43,6 +43,10 @@ log.info("BOT", "Đang khởi động Ryo...");
 // ── Validate env ──────────────────────────────────────────
 if (!process.env.DISCORD_TOKEN)  { log.error("ENV", "❌ DISCORD_TOKEN missing in .env"); process.exit(1); }
 if (!process.env.OPENAI_API_KEY) { log.error("ENV", "❌ OPENAI_API_KEY missing in .env"); process.exit(1); }
+if (!process.env.LLAMA_API_KEY) {
+  log.warn("ENV", "⚠️ LLAMA_API_KEY chưa set — não chat chính sẽ fallback dùng OPENAI_API_KEY, " +
+    "nhưng key đó không hợp lệ với Groq/endpoint Llama → chat chính sẽ lỗi auth. Nên set LLAMA_API_KEY riêng.");
+}
 log.info("ENV", "✅ Environment variables loaded");
 
 // ── Init ──────────────────────────────────────────────────
@@ -75,7 +79,8 @@ Tag      : ${client.user.tag}
 User ID  : ${client.user.id}
 Servers  : ${client.guilds.cache.size}
 ----------------------------------------------
-Model    : ${process.env.OPENAI_MODEL ?? "gpt-4o-mini"}
+Chat model : ${process.env.LLAMA_MODEL ?? "llama3-70b-8192"} (não chính, qua Groq)
+Memory AI  : gpt-4o-mini (fact/reflection, qua OpenAI)
 Owner ID : ${OWNER_ID ?? "tự detect theo từng server"}
 Idle Ch  : ${IDLE_CHANNEL_ID ?? "not set"}
 ----------------------------------------------

@@ -44,6 +44,10 @@ function formatMessagesWithFewshot(messages, pickCount = 2) {
     { role: "assistant", content: ex.assistant }
   ]);
 
+  if (process.env.DEBUG_FEWSHOT === "1") {
+    console.log(`[Fewshot] 🎲 Đã chọn ${picked.length} ví dụ:`, picked.map(ex => `"${ex.user}" → "${ex.assistant}"`));
+  }
+
   // Nhét few-shot examples vào giữa history (trước tin nhắn cuối cùng của user)
   if (messages.length === 0) return fewshotMessages;
   const lastMsg = messages[messages.length - 1];
@@ -183,11 +187,13 @@ function pickMood() {
 
 // ── Token budget theo độ dài tin nhắn ───────────────────────
 function computeMaxTokens(userMessage = "", hasImage = false) {
-  if (hasImage) return 200;
+  if (hasImage) return 220;
   const len = userMessage.trim().length;
-  if (len <= 6) return 16;
-  if (len <= 25) return 30;
-  return 55;
+  // Vietnamese có dấu thường tốn nhiều token/ký tự hơn Latin thường trong tokenizer của Llama —
+  // nới nhẹ ceiling so với bản cũ (16/30/55) để giảm rủi ro bị cắt cụt câu giữa dòng.
+  if (len <= 6) return 24;
+  if (len <= 25) return 45;
+  return 80;
 }
 
 // ── Gemini Judge ─────────────────────────────────────────────
@@ -257,7 +263,7 @@ export class RyoAI {
           input: text.slice(0, 2000),
           dimensions: EMBED_DIMS,
         }),
-        { label: "Embedding" }
+        { label: "Embedding", retries: 1 } // non-critical (chỉ để recall fact) — fail nhanh, đừng làm chậm reply chính
       );
       return resp.data[0].embedding;
     } catch (err) {
@@ -328,7 +334,9 @@ export class RyoAI {
       // Thứ thật sự cần bắt: bị lễ phép hoá / "dạ vâng ạ" — đây mới là dấu hiệu lệch giọng thật.
       const BANNED_FORMAL = /\b(dạ|vâng ạ|kính (thưa|gửi|chào)|quý khách|xin lỗi ạ|rất hân hạnh)\b/i;
       const needsFix = BANNED_FORMAL.test(responseText);
+      let alreadyFixed = false;
       if (needsFix) {
+        alreadyFixed = true;
         console.warn(`[RyoAI] ⚠️ Phát hiện lệch giọng ("${responseText.slice(0, 40)}..."), regenerate...`);
         try {
           const retry = await withRetry(
@@ -357,7 +365,8 @@ export class RyoAI {
       }
 
       // ── Guard lớp 2: judge bằng Gemini ───
-      if (GEMINI_KEY && isSuspiciousReply(userMessage, responseText)) {
+      // Chỉ chạy nếu lớp 1 (local guard) CHƯA sửa gì — tránh 2 lớp độc lập đá nhau.
+      if (!alreadyFixed && GEMINI_KEY && isSuspiciousReply(userMessage, responseText)) {
         const verdict = await judgeWithGemini(userMessage, responseText);
         if (verdict && verdict.ok === false) {
           console.warn(`[RyoAI] ⚠️ Gemini judge flag: "${verdict.reason}" — regenerate với Llama...`);
@@ -389,7 +398,7 @@ export class RyoAI {
       }
     } catch (err) {
       console.error("[RyoAI] Llama API error:", err.message);
-      const fallbacks = ["lag rồi... thử lại chút đi 😵", "uh. brain.exe crashed. một giây", "Llama không hợp tác lúc này ngl"];
+      const fallbacks = ["lag rồi... thử lại chút đi 😵", "uh. brain.exe crashed. một giây", "Llama không hợp tác lúc này, thử lại đi"];
       return fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 
