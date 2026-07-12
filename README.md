@@ -96,6 +96,37 @@ Ví dụ trong Discord:
 Comment chỉ được xem là ý kiến của người dùng YouTube, không phải bằng chứng xác thực. Bot
 không được bịa thêm comment hoặc tuyên bố tỷ lệ phần trăm khi chưa thực sự tính toán.
 
+### Lọc và chọn comment liên quan
+
+Trước khi gửi dữ liệu cho Ollama, bot chuẩn hóa Unicode/HTML, loại noise và promotion, gộp
+comment trùng, chấm quality/relevance, phân loại sentiment, gom topic và chọn quote đại diện.
+Ollama chỉ nhận structured evidence đã giới hạn, không nhận toàn bộ raw comment.
+
+```env
+YOUTUBE_COMMENT_FETCH_LIMIT=100
+YOUTUBE_COMMENT_PROCESS_LIMIT=300
+YOUTUBE_COMMENT_LLM_LIMIT=30
+YOUTUBE_COMMENT_TOPIC_LIMIT=8
+YOUTUBE_COMMENT_QUOTES_PER_TOPIC=3
+YOUTUBE_COMMENT_SIMILARITY_THRESHOLD=0.84
+YOUTUBE_COMMENT_MIN_QUALITY=0.2
+YOUTUBE_COMMENT_MIN_RELEVANCE=0.12
+```
+
+Các mode được suy ra tự động từ câu hỏi: `overall_reaction`, `praise`, `criticism`,
+`problems`, `questions`, `disagreement`, `useful_quotes`, `funny_comments`,
+`topic_search` và `representative_sample`. Ví dụ:
+
+```text
+@Ryo lấy mấy comment đáng chú ý của video này <URL>
+@Ryo mọi người chê gì? <URL>
+@Ryo comment nào nói về âm thanh? <URL>
+@Ryo có ai báo lỗi không? <URL>
+@Ryo lấy vài câu hài nhất <URL>
+@Ryo lọc bỏ comment rác rồi tóm tắt <URL>
+@Ryo lấy 10 câu liên quan đến pin <URL>
+```
+
 ## Conversation pipeline
 
 Tin nhắn chat thông thường đi qua pipeline rule-based trước khi gọi model:

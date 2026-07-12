@@ -2,7 +2,7 @@ const GREETINGS = /^(alo|hello|hi|hey|chào|chao|halo|yo)(\s+(ryo|bot))?[!.?]*$/
 const PINGS = /^(ryo|ê|ey|ơi|này|ping|hửm)[!.?]*$/iu;
 const SHORT_REACTIONS = /^(ừ|uh|ờ|ok|okay|lol|haha|hmm|hm|vậy à|thật á|:v|=\)+|\?+)$/iu;
 const ROLEPLAY = /\b(roleplay|nhập vai|đóng vai|diễn vai|giả làm|hãy làm .* nhân vật)\b/iu;
-const YOUTUBE = /\b(youtube|youtu\.be|video yt|clip yt)\b/iu;
+const YOUTUBE = /(youtube|youtu\.be|video yt|clip yt|bình luận|binh luan|comment|mọi người (phản ứng|chê|khen)|moi nguoi (phan ung|che|khen)|báo lỗi|bao loi|câu hài|cau hai|đáng chú ý|dang chu y|liên quan (đến|tới)|lien quan (den|toi)|lọc bỏ comment rác|loc bo comment rac)/iu;
 const TECHNICAL = /\b(ollama|rag|llm|model|api|code|javascript|node\.js|discord\.js|sqlite|lancedb|embedding|vector|database|server|docker|linux|windows|bug|lỗi|error)\b/iu;
 
 export function classifyIntent(analysis) {

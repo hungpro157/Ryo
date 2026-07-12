@@ -23,6 +23,7 @@ export function createYouTubeService(options = {}) {
   return {
     getVideoInfo: (urlOrId, requestOptions = {}) => fetchVideoInfo(client, urlOrId, requestOptions),
     getCommentReplies: (parentCommentId, requestOptions = {}) => fetchCommentReplies(client, parentCommentId, withLimits(requestOptions)),
+    getTopLevelComments: (urlOrId, requestOptions = {}) => fetchTopLevelComments(client, urlOrId, withLimits(requestOptions)),
     async getComments(urlOrId, requestOptions = {}) {
       const video = await fetchVideoInfo(client, urlOrId, requestOptions);
       const result = await fetchTopLevelComments(client, urlOrId, withLimits(requestOptions));

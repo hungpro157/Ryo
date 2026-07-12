@@ -92,7 +92,7 @@ test('passes normalized YouTube comments into the existing prompt pipeline', asy
     youtubeTool: {
       getComments: async () => ({
         video: { id: 'dQw4w9WgXcQ', title: 'Test video' },
-        comments: [{ id: 'c1', author: 'A', text: 'hay', likeCount: 1, publishedAt: '', updatedAt: '', replyCount: 0 }],
+        comments: [{ id: 'c1', author: 'A', text: 'Giải thích dễ hiểu vì có ví dụ cụ thể', likeCount: 1, publishedAt: '', updatedAt: '', replyCount: 0 }],
         nextPageToken: null,
       }),
     },
@@ -103,7 +103,7 @@ test('passes normalized YouTube comments into the existing prompt pipeline', asy
     generate: async () => 'Mới lấy được một bình luận và người đó khen video hay.',
   });
   assert.equal(result.intent, 'youtube_request');
-  assert.equal(receivedToolContext.comments[0].text, 'hay');
+  assert.equal(receivedToolContext.selectedComments[0].text, 'Giải thích dễ hiểu vì có ví dụ cụ thể');
   assert.match(result.reply, /một bình luận/u);
 });
 
@@ -119,5 +119,5 @@ test('does not ask the model to invent comments when the API returns none', asyn
     generate: async () => { generated = true; return 'invented'; },
   });
   assert.equal(generated, false);
-  assert.match(result.reply, /không có bình luận công khai/u);
+  assert.match(result.reply, /không tìm thấy bình luận đủ nội dung/u);
 });

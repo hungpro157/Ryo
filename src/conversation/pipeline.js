@@ -10,6 +10,7 @@ import { selectFewShots } from './fewShotSelector.js';
 import { validateResponse } from './responseValidator.js';
 import { youtube, YouTubeError, youtubeErrorMessage } from '../tools/youtube/index.js';
 import { analyzeYouTubeRequest, compactYouTubeToolResult } from './youtubeRequest.js';
+import { createYouTubeCommentsTool, youtubeCommentsTool as defaultYouTubeCommentsTool } from '../tools/youtube/youtubeCommentsTool.js';
 
 function safeFallback(intent, input) {
   const choices = {
@@ -32,6 +33,8 @@ export async function generateConversationResponse(input, dependencies = {}) {
   const generate = dependencies.generate || chatCompletion;
   const buildPrompt = dependencies.buildPrompt || buildDynamicPrompt;
   const youtubeTool = dependencies.youtubeTool || youtube;
+  const commentTool = dependencies.youtubeCommentsTool
+    || (dependencies.youtubeTool ? createYouTubeCommentsTool({ youtubeService: youtubeTool }) : defaultYouTubeCommentsTool);
   let toolContext = null;
   let lastResponse = '';
   let lastViolations = [];
@@ -44,14 +47,16 @@ export async function generateConversationResponse(input, dependencies = {}) {
     if (request.url) {
       try {
         const result = request.operation === 'comments'
-          ? await youtubeTool.getComments(request.url, {
-            maxResults: config.youtube.defaultMaxResults,
+          ? await commentTool.analyzeYoutubeComments({
+            videoUrl: request.url,
+            mode: request.mode,
+            query: request.query,
+            resultLimit: request.resultLimit,
             includeReplies: request.includeReplies,
-            language: config.youtube.language,
           })
           : await youtubeTool.getVideoInfo(request.url, { language: config.youtube.language });
-        if (request.operation === 'comments' && result.comments.length === 0) {
-          return { reply: 'video này không có bình luận công khai để mình tóm tắt.', intent, analysis, generation, ragSources: [] };
+        if (request.operation === 'comments' && result.sample.processedCount === 0) {
+          return { reply: 'mình không tìm thấy bình luận đủ nội dung sau khi lọc rác.', intent, analysis, generation, ragSources: [] };
         }
         toolContext = compactYouTubeToolResult(result, request.operation);
       } catch (error) {
