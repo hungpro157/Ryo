@@ -1,19 +1,25 @@
 {
-  "name": "ryo-discord-bot",
-  "version": "2.0.0",
-  "description": "Ryo — Discord AI Bot with memory & learning",
-  "main": "bot.js",
+  "name": "ryo-discord-bot-pc",
+  "version": "4.0.0-pc",
+  "description": "Ryo Discord AI bot for Windows PC with Ollama, Qwen and LanceDB RAG",
+  "main": "src/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "start": "node bot.js",
-    "dev": "node --watch bot.js"
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test",
+    "check": "node scripts/check.js",
+    "db:reset": "node scripts/reset-db.js"
   },
   "dependencies": {
-    "@discordjs/voice": "0.18.0",
+    "@lancedb/lancedb": "^0.22.3",
+    "better-sqlite3": "^12.11.1",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
-    "ffmpeg-static": "^5.2.0",
-    "openai": "^4.52.7",
-    "opusscript": "^0.0.8"
+    "lru-cache": "^10.2.0",
+    "uuid": "^11.1.0"
   }
 }
