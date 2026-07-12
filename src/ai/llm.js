@@ -27,7 +27,7 @@ export async function chatCompletion(messages, options = {}) {
     timeoutMs: options.timeout ?? config.llm.timeout,
     contextLimit: options.contextLimit ?? config.llm.contextLimit,
   };
-  const retries = options.retries ?? Number.parseInt(process.env.LLM_RETRIES || '1', 10);
+  const retries = options.retries ?? config.llm.retries;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     const startedAt = Date.now();

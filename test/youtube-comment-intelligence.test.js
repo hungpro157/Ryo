@@ -176,3 +176,23 @@ test('fetches pages up to the configured limit before compact processing', async
   assert.equal(result.sample.fetchedCount, 60);
   assert.ok(result.selectedComments.length <= 5);
 });
+
+test('concurrent identical comment requests share one fetch and then hit cache', async () => {
+  let calls = 0;
+  const service = {
+    getVideoInfo: async () => ({ ...video, commentCount: 1 }),
+    getTopLevelComments: async () => {
+      calls += 1;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return { comments: [raw('one', 'Âm thanh nhỏ ở phút 12 vì mic bị rè')], nextPageToken: null };
+    },
+  };
+  const tool = createYouTubeCommentsTool({ youtubeService: service });
+  await Promise.all([
+    tool.analyzeYoutubeComments({ videoUrl: 'dQw4w9WgXcQ', mode: 'problems' }),
+    tool.analyzeYoutubeComments({ videoUrl: 'dQw4w9WgXcQ', mode: 'problems' }),
+  ]);
+  await tool.analyzeYoutubeComments({ videoUrl: 'dQw4w9WgXcQ', mode: 'problems' });
+  assert.equal(calls, 1);
+  assert.deepEqual(tool.getCacheStats(), { entries: 1, inFlight: 0, hits: 1, misses: 1, shared: 1 });
+});

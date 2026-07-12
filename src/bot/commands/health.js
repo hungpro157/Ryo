@@ -20,6 +20,7 @@ export async function handleHealth(msg) {
       `Embedding: \`${config.embedding.provider}/${config.embedding.model}\``,
       `LanceDB: ✅ Online`,
       `SQLite memory: \`${memoryStats.messages} messages / ${memoryStats.summaries} summaries\``,
+      `YouTube comments: \`${config.youtube.commentsEnabled && config.youtube.apiKey ? 'ready' : 'disabled'}\``,
       `RAG mode: \`${config.rag.mode}\``,
       `Knowledge chunks: \`${stats.knowledgeChunks}\``,
       `Total records: \`${stats.totalChunks}\``,

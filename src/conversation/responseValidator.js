@@ -12,7 +12,7 @@ function contextText(history = [], summary = '') {
   return `${summary}\n${history.map((message) => message.content || '').join('\n')}`.toLocaleLowerCase('vi');
 }
 
-export function validateResponse({ response, analysis, intent, history = [], summary = '' }) {
+export function validateResponse({ response, analysis, intent, history = [], summary = '', toolContext = null }) {
   const text = String(response || '').trim();
   const violations = [];
   const evidence = contextText(history, summary);
@@ -42,6 +42,19 @@ export function validateResponse({ response, analysis, intent, history = [], sum
   if (intent === 'youtube_request' && /\b\d+(?:[.,]\d+)?\s*(%|phần trăm)\b/iu.test(text)) {
     violations.push('unsupported_percentage');
   }
+
+  if (intent === 'youtube_request' && toolContext?.operation === 'comments') {
+    const evidenceQuotes = (toolContext.selectedComments || []).map((item) => String(item.text || '').toLocaleLowerCase('vi'));
+    const quotes = [...text.matchAll(/["“”]([^"“”]{4,500})["“”]/gu)].map((match) => match[1].toLocaleLowerCase('vi'));
+    if (quotes.some((quote) => !evidenceQuotes.some((evidence) => evidence.includes(quote)))) violations.push('fabricated_comment_quote');
+    const limited = toolContext.limitations?.length || (toolContext.video?.commentCount || 0) > (toolContext.sample?.fetchedCount || 0);
+    if (limited && /(đã (đọc|xử lý|phân tích) (toàn bộ|tất cả)|tất cả bình luận|toàn bộ bình luận)/iu.test(text)) violations.push('false_complete_comment_sample');
+  }
+
+  if (/\{\s*"?(toolContext|selectedComments|ragSources|system_prompt)"?\s*:/iu.test(text)) violations.push('internal_json_leak');
+  const sentences = text.split(/(?<=[.!?])\s+/u).map((item) => item.trim().toLocaleLowerCase('vi')).filter((item) => item.length > 12);
+  if (sentences.some((sentence) => sentences.filter((item) => item === sentence).length >= 3)) violations.push('repetitive_output');
+  if (text.length > 6000) violations.push('excessive_output');
 
   return { valid: violations.length === 0, violations: [...new Set(violations)] };
 }

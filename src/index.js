@@ -6,17 +6,35 @@ import { initDB, closeDB } from './database/lancedb/index.js';
 import { setupReadyEvent } from './bot/events/ready.js';
 import { setupMessageCreateEvent } from './bot/events/messageCreate.js';
 import { initMemoryDB, closeMemoryDB } from './database/sqlite/memory.js';
+import { validateConfig } from './config/validate.js';
+import { checkChatProvider } from './ai/llm.js';
 
 // Catch errors gracefully
 process.on('uncaughtException', (err) => {
-  log.error('APP', `Uncaught Exception: ${err.stack}`);
+  log.error('APP', 'Uncaught exception', { error: err.message, name: err.name });
 });
 process.on('unhandledRejection', (reason) => {
-  log.error('APP', `Unhandled Rejection: ${reason}`);
+  log.error('APP', 'Unhandled rejection', { error: reason instanceof Error ? reason.message : String(reason) });
 });
 
 async function bootstrap() {
   log.info('APP', 'Starting Ryo Local AI Bot...');
+
+  const validation = validateConfig();
+  for (const warning of validation.warnings) log.warn('CONFIG', warning);
+  if (!validation.ok) {
+    for (const error of validation.fatal) log.error('CONFIG', error);
+    process.exit(1);
+  }
+
+  try {
+    const provider = await checkChatProvider();
+    if (provider.modelFound === false) throw new Error(`Configured model not found: ${config.llm.model}`);
+    log.info('HEALTH', 'Core provider ready', { provider: config.llm.provider, model: config.llm.model });
+  } catch (error) {
+    log.error('HEALTH', 'Core provider check failed', { provider: config.llm.provider, error: error.message });
+    process.exit(1);
+  }
 
   try {
     initMemoryDB();

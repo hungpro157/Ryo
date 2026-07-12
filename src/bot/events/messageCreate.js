@@ -7,6 +7,7 @@ import { addMessageToConversation, getMessageCountSinceReflection, getRecentConv
 import { triggerReflection } from '../../ai/reflection.js';
 import { generateConversationResponse } from '../../conversation/pipeline.js';
 import { handleCommand } from '../commands/index.js';
+import { classifyError, userErrorMessage } from '../../utils/errors.js';
 
 export function setupMessageCreateEvent(client) {
   client.on(Events.MessageCreate, async (msg) => {
@@ -21,7 +22,7 @@ export function setupMessageCreateEvent(client) {
     const randomChance = !isCommand && Math.random() < config.discord.respondChance;
 
     if (isCommand) {
-      log.info('CMD', `${msg.author.username} → ${content}`);
+      log.info('CMD', 'Command received', { command: content.slice(config.discord.prefix.length).trim().split(/\s+/u)[0] || 'unknown', guildId: msg.guild?.id || 'DM', userId: msg.author.id, characterCount: content.length });
       try {
         await handleCommand(msg, content.slice(config.discord.prefix.length).trim());
       } catch (error) {
@@ -44,14 +45,14 @@ export function setupMessageCreateEvent(client) {
     const userId = msg.author.id;
     const username = msg.member?.displayName ?? msg.author.username;
 
-    log.msg('CHAT', `[${guildId}] ${username} @ ${channelId}: "${content.slice(0, 80)}"`);
+    log.info('CHAT', 'Message accepted', { guildId, channelId, userId, characterCount: content.length, isDM, isMentioned, hasKeyword });
 
     addMessageToConversation(guildId, channelId, userId, { role: 'user', username, content });
 
-    await msg.channel.sendTyping();
     const t0 = Date.now();
 
     try {
+      await msg.channel.sendTyping();
       const history = getRecentConversation(guildId, channelId, userId).slice(0, -1);
       
       const result = await generateConversationResponse({
@@ -70,7 +71,7 @@ export function setupMessageCreateEvent(client) {
       }
       
       const ms = Date.now() - t0;
-      log.info('CHAT', `↳ Ryo (${ms}ms): "${reply.slice(0, 80)}..."`);
+      log.info('CHAT', 'Response ready', { durationMs: ms, responseLength: reply.length, intent: result.intent, tools: result.diagnostics?.selectedTools || [] });
 
       addMessageToConversation(guildId, channelId, userId, { role: 'assistant', username: 'Ryo', content: reply });
 
@@ -90,8 +91,9 @@ export function setupMessageCreateEvent(client) {
       }
 
     } catch (err) {
-      log.error('CHAT', `Error generating response: ${err.message}`);
-      await msg.reply({ content: 'lag rồi... chờ chút nha 😵', allowedMentions: { repliedUser: false } });
+      const error = classifyError(err);
+      log.error('CHAT', 'Response failed', { code: error.code, error: error.message });
+      await msg.reply({ content: userErrorMessage(error), allowedMentions: { repliedUser: false } });
     }
   });
 }

@@ -1,10 +1,21 @@
 import { youtubeCommentConfig } from '../../config/youtubeCommentConfig.js';
 import { youtube } from './index.js';
 import { processComments } from './comments/commentPipeline.js';
+import { LRUCache } from 'lru-cache';
+import { extractVideoId } from './youtubeUrl.js';
 
 export function createYouTubeCommentsTool({ youtubeService = youtube, config = youtubeCommentConfig } = {}) {
+  const resultCache = new LRUCache({ max: 100, ttl: 15 * 60 * 1000 });
+  const inFlight = new Map();
+  const stats = { hits: 0, misses: 0, shared: 0 };
   return {
     async analyzeYoutubeComments({ videoUrl, mode = 'overall_reaction', query = null, fetchLimit, resultLimit, includeReplies = false }) {
+      const cacheKey = JSON.stringify({ videoId: extractVideoId(videoUrl), mode, query, fetchLimit, resultLimit, includeReplies, version: 'comments-v1' });
+      const cached = resultCache.get(cacheKey);
+      if (cached) { stats.hits += 1; return { ...cached, cacheHit: true }; }
+      if (inFlight.has(cacheKey)) { stats.shared += 1; return inFlight.get(cacheKey); }
+      stats.misses += 1;
+      const work = (async () => {
       const target = Math.min(fetchLimit || config.fetchLimit, config.processLimit);
       const comments = [];
       let video = null;
@@ -29,8 +40,14 @@ export function createYouTubeCommentsTool({ youtubeService = youtube, config = y
         pageToken = page.nextPageToken || null;
       } while (pageToken && comments.length < target);
 
-      return processComments({ rawComments: comments, video, mode, query, resultLimit, config });
+      const result = processComments({ rawComments: comments, video, mode, query, resultLimit, config });
+      resultCache.set(cacheKey, result);
+      return { ...result, cacheHit: false };
+      })();
+      inFlight.set(cacheKey, work);
+      try { return await work; } finally { inFlight.delete(cacheKey); }
     },
+    getCacheStats() { return { entries: resultCache.size, inFlight: inFlight.size, ...stats }; },
   };
 }
 

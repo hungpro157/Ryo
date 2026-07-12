@@ -11,7 +11,11 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "test": "node --test",
+    "test:behavior": "node --test test/behavior.test.js test/routing.test.js",
+    "test:integration": "node --test test/routing.test.js test/youtube.test.js",
     "check": "node scripts/check.js",
+    "check:imports": "node scripts/check-imports.js",
+    "validate:config": "node scripts/validate-config.js",
     "db:reset": "node scripts/reset-db.js"
   },
   "dependencies": {

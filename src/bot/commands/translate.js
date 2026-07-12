@@ -1,8 +1,9 @@
 // commands/translate.js — !translate / !dich
 
 import { log } from "../../utils/logger.js";
+import { chatCompletion } from '../../ai/llm.js';
 
-export async function handleTranslate(msg, body, { ai }) {
+export async function handleTranslate(msg, body) {
   const [langRaw, ...rest] = body.split(/\s+/);
   const lang = langRaw;
   let text   = rest.join(" ").trim();
@@ -24,7 +25,10 @@ export async function handleTranslate(msg, body, { ai }) {
 
   await msg.channel.sendTyping();
   try {
-    const translated = await ai.translateText(text, lang);
+    const translated = await chatCompletion([
+      { role: 'system', content: `Dịch nội dung sang ${lang}. Chỉ trả về bản dịch, không giải thích.` },
+      { role: 'user', content: text.slice(0, 10000) },
+    ], { maxTokens: 500, temperature: 0.1 });
     await msg.reply({ content: translated, allowedMentions: { repliedUser: false } });
   } catch (err) {
     log.error("TRANSLATE", err.message);

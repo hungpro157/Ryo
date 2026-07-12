@@ -39,7 +39,7 @@ export async function ollamaChat(messages, options, providerConfig) {
 }
 
 export async function checkOllamaChat(providerConfig, model) {
-  const response = await fetch(`${providerConfig.baseUrl}/api/tags`);
+  const response = await fetch(`${providerConfig.baseUrl}/api/tags`, { signal: AbortSignal.timeout(10000) });
   if (!response.ok) throw new Error(`Ollama is unavailable: HTTP ${response.status}`);
   const data = await response.json();
   const names = (data.models || []).map((item) => item.name);

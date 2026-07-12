@@ -11,6 +11,7 @@ export const config = {
     maxTokens: Number.parseInt(process.env.LLM_MAX_TOKENS || '300', 10),
     timeout: Number.parseInt(process.env.LLM_TIMEOUT || '120000', 10),
     contextLimit: Number.parseInt(process.env.LLM_CONTEXT_LIMIT || '4096', 10),
+    retries: Number.parseInt(process.env.LLM_RETRIES || '1', 10),
   },
   embedding: {
     provider: embeddingProvider,
@@ -50,12 +51,15 @@ export const config = {
     defaultMaxResults: Number.parseInt(process.env.YOUTUBE_MAX_COMMENTS || '20', 10),
     maxResults: Number.parseInt(process.env.YOUTUBE_MAX_COMMENTS_LIMIT || '50', 10),
     language: process.env.YOUTUBE_LANGUAGE || 'vi',
+    commentsEnabled: (process.env.YOUTUBE_COMMENTS_ENABLED || 'true').toLowerCase() === 'true',
   },
   discord: {
     token: process.env.DISCORD_TOKEN,
     prefix: process.env.PREFIX || '!',
     ownerId: process.env.OWNER_ID || null,
     idleChannelId: process.env.IDLE_CHANNEL_ID || null,
+    idleMinHours: Number.parseFloat(process.env.IDLE_MIN_HOURS || '24'),
+    idleMaxHours: Number.parseFloat(process.env.IDLE_MAX_HOURS || '48'),
     respondChance: Number.parseFloat(process.env.RESPOND_CHANCE || '0'),
     reactionOnlyRate: Number.parseFloat(process.env.REACTION_ONLY_RATE || '0'),
     triggerWords: ['ryo', 'りょ', 'リョ'],

@@ -1,8 +1,12 @@
 // core/idle.js — Hệ thống tự nhắn khi server im lặng quá lâu
 
 import { log } from "../utils/logger.js";
-import { rand, sleep } from "../utils/helpers.js";
-import { IDLE_MIN_HOURS, IDLE_MAX_HOURS, IDLE_CHANNEL_ID } from "../config/index.js";
+import { rand } from "../utils/helpers.js";
+import { config } from "../config/index.js";
+
+const IDLE_CHANNEL_ID = config.discord.idleChannelId;
+const IDLE_MIN_HOURS = config.discord.idleMinHours;
+const IDLE_MAX_HOURS = config.discord.idleMaxHours;
 
 const IDLE_MESSAGES = [
   "chán quá... không ai nói chuyện với mình hết vậy 😮‍💨",

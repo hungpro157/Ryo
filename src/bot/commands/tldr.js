@@ -2,8 +2,9 @@
 
 import { EmbedBuilder } from "discord.js";
 import { log } from "../../utils/logger.js";
+import { chatCompletion } from '../../ai/llm.js';
 
-export async function handleTldr(msg, body, { ai }) {
+export async function handleTldr(msg, body) {
   let n = parseInt(body, 10);
   if (!Number.isFinite(n) || n <= 0) n = 30;
   n = Math.min(n, 100);
@@ -29,7 +30,10 @@ export async function handleTldr(msg, body, { ai }) {
   }
 
   try {
-    const summary = await ai.summarizeChannel(transcript);
+    const summary = await chatCompletion([
+      { role: 'system', content: 'Tóm tắt ngắn gọn đoạn chat Discord sau bằng tiếng Việt. Không thêm dữ kiện.' },
+      { role: 'user', content: transcript.slice(0, 12000) },
+    ], { maxTokens: 350, temperature: 0.2 });
     const embed = new EmbedBuilder()
       .setTitle(`📋 TL;DR — ${sorted.length} tin nhắn gần nhất`)
       .setColor(0x3498DB)

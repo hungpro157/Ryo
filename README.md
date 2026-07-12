@@ -237,6 +237,26 @@ npm.cmd start
 npm.cmd run db:reset -- --force
 ```
 
+## Stabilization checks
+
+```powershell
+npm.cmd test
+npm.cmd run test:behavior
+npm.cmd run test:integration
+npm.cmd run check
+npm.cmd run check:imports
+npm.cmd run validate:config
+```
+
+Pipeline ghi timing cho analyze, intent, tool, prompt, generation, validation và total. Log chỉ
+chứa metadata như intent, tool đã chọn, độ dài và thời gian; raw chat, transcript, comment,
+token và API key không được ghi. Các request YouTube comments giống nhau đang chạy đồng thời
+được gộp bằng single-flight và kết quả xử lý có LRU cache 15 phút.
+
+`YOUTUBE_COMMENTS_ENABLED=false` tắt riêng YouTube comments mà không ảnh hưởng chat/Ollama.
+Transcript retrieval chưa có trong commit hiện tại; các test transcript chỉ nên được thêm sau
+khi Phase 3 được triển khai và commit riêng.
+
 ## Phát triển bằng Codex
 
 Project có `AGENTS.md`. Trước khi cho Codex sửa:
